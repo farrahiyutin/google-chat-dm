@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base target="_top">
+    <style>
+        /* =========================================
+       Design System — Chat DM Sidebar
+       ========================================= */
+        :root {
+            --primary: #1a73e8;
+            --primary-hover: #1557b0;
+            --primary-light: #e8f0fe;
+            --success: #34a853;
+            --success-light: #e8f5e9;
+            --error: #ea4335;
+            --error-light: #fce8e6;
+            --warning: #fbbc04;
+            --bg: #f8f9fa;
+            --surface: #ffffff;
+            --text-primary: #202124;
+            --text-secondary: #5f6368;
+            --border: #dadce0;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+            --radius: 8px;
+            --transition: 150ms ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Google Sans', 'Segoe UI', Roboto, sans-serif;
+            font-size: 13px;
+            color: var(--text-primary);
+            background: var(--bg);
+            min-height: 100vh;
+        }
+
+        /* =========================================
+       Layout
+       ========================================= */
+        .sidebar-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+        }
+
+        .sidebar-header h2 {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .sidebar-header p {
+            font-size: 11px;
+            opacity: 0.85;
+        }
+
+        .sidebar-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .sidebar-footer {
+            padding: 12px;
+            border-top: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        /* =========================================
+       Form Elements
+       ========================================= */
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        select,
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 8px 10px;
+            font-size: 13px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface);
+            color: var(--text-primary);
+            font-family: inherit;
+            transition: border-color var(--transition);
+        }
+
+        select:focus,
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary-light);
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        /* =========================================
+       Recipients Picker
+       ========================================= */
+        .recipients-picker {
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .recipient-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 10px;
+            cursor: pointer;
+            transition: background var(--transition);
+            border-bottom: 1px solid #f1f3f4;
+        }
+
+        .recipient-item:last-child {
+            border-bottom: none;
+        }
+
+        .recipient-item:hover {
+            background: var(--primary-light);
+        }
+
+        .recipient-item.selected {
+            background: var(--primary-light);
+        }
+
+        .recipient-item input[type="checkbox"] {
+            margin-right: 8px;
+            accent-color: var(--primary);
+        }
+
+        .recipient-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .recipient-name {
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .recipient-detail {
+            font-size: 11px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .no-recipients {
+            padding: 20px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-style: italic;
+            font-size: 12px;
+        }
+
+        /* =========================================
+       Selection Controls
+       ========================================= */
+        .selection-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .selection-controls .count {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .selection-controls button {
+            font-size: 11px;
+            color: var(--primary);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 2px 4px;
+            font-weight: 500;
+        }
+
+        .selection-controls button:hover {
+            text-decoration: underline;
+        }
+
+        /* =========================================
+       Filters Row
+       ========================================= */
+        .filters-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .filters-row select {
+            font-size: 11px;
+            padding: 5px 6px;
+        }
+
+        /* =========================================
+       Buttons
+       ========================================= */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-hover);
+            box-shadow: 0 2px 6px rgba(26, 115, 232, 0.3);
+        }
+
+        .btn-primary:disabled {
+            background: var(--border);
+            color: var(--text-secondary);
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-light);
+        }
+
+        /* =========================================
+       Status Banner
+       ========================================= */
+        .status-banner {
+            padding: 10px 12px;
+            border-radius: var(--radius);
+            font-size: 12px;
+            margin-bottom: 12px;
+            display: none;
+        }
+
+        .status-banner.show {
+            display: block;
+        }
+
+        .status-banner.success {
+            background: var(--success-light);
+            color: #1b5e20;
+            border: 1px solid #a5d6a7;
+        }
+
+        .status-banner.error {
+            background: var(--error-light);
+            color: #c62828;
+            border: 1px solid #ef9a9a;
+        }
+
+        .status-banner.sending {
+            background: #fff3e0;
+            color: #e65100;
+            border: 1px solid #ffcc80;
+        }
+
+        /* =========================================
+       Spinner
+       ========================================= */
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 6px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* =========================================
+       Character Count
+       ========================================= */
+        .char-count {
+            text-align: right;
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar-container">
+
+        <!-- Header -->
+        <div class="sidebar-header">
+            <h2>💬 Compose Chat DM</h2>
+            <p>Send direct messages via Google Chat</p>
+        </div>
+
+        <!-- Status Banner -->
+        <div id="statusBanner" class="status-banner"></div>
+
+        <!-- Body -->
+        <div class="sidebar-body">
+
+            <!-- Search & Filters -->
+            <div class="form-group">
+                <label>Search Recipients</label>
+                <input type="text" id="searchInput" placeholder="Search by name or email…" oninput="filterRecipients()">
+            </div>
+
+            <div class="filters-row">
+                <select id="filterSchool" onchange="filterRecipients()">
+                    <option value="">All Schools</option>
+                </select>
+                <select id="filterRole" onchange="filterRecipients()">
+                    <option value="">All Roles</option>
+                </select>
+                <select id="filterGroup" onchange="filterRecipients()">
+                    <option value="">All Groups</option>
+                </select>
+            </div>
+
+            <!-- Selection Controls -->
+            <div class="selection-controls">
+                <span class="count" id="selectionCount">0 selected</span>
+                <div>
+                    <button onclick="selectAll()">Select All</button>
+                    <button onclick="deselectAll()">Clear</button>
+                </div>
+            </div>
+
+            <!-- Recipients List -->
+            <div class="recipients-picker" id="recipientsList">
+                <div class="no-recipients">Loading recipients…</div>
+            </div>
+
+            <!-- Message -->
+            <div class="form-group" style="margin-top: 12px;">
+                <label>Message</label>
+                <textarea id="messageInput"
+                    placeholder="Type your message here…&#10;&#10;Supports *bold*, _italic_, and ~strikethrough~ formatting."
+                    oninput="updateCharCount()"></textarea>
+                <div class="char-count" id="charCount">0 characters</div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="sidebar-footer">
+            <button class="btn btn-primary" id="sendBtn" onclick="sendMessages()" disabled>
+                Send Message
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // =========================================
+        // State
+        // =========================================
+        let allRecipients = [];
+        let filteredRecipients = [];
+        let selectedEmails = new Set();
+
+        // =========================================
+        // Initialization
+        // =========================================
+        document.addEventListener('DOMContentLoaded', function () {
+            loadRecipients();
+            loadFilters();
+        });
+
+        function loadRecipients() {
+            google.script.run
+                .withSuccessHandler(function (data) {
+                    allRecipients = data || [];
+                    filteredRecipients = allRecipients;
+                    renderRecipients();
+                })
+                .withFailureHandler(function (err) {
+                    showStatus('Failed to load recipients: ' + err.message, 'error');
+                })
+                .getRecipientsForSidebar({});
+        }
+
+        function loadFilters() {
+            google.script.run
+                .withSuccessHandler(function (opts) {
+                    populateFilter('filterSchool', opts.schools, 'All Schools');
+                    populateFilter('filterRole', opts.roles, 'All Roles');
+                    populateFilter('filterGroup', opts.groups, 'All Groups');
+                })
+                .getFilterOptions();
+        }
+
+        function populateFilter(selectId, values, placeholder) {
+            const sel = document.getElementById(selectId);
+            sel.innerHTML = '<option value="">' + placeholder + '</option>';
+            values.forEach(function (v) {
+                const opt = document.createElement('option');
+                opt.value = v;
+                opt.textContent = v;
+                sel.appendChild(opt);
+            });
+        }
+
+        // =========================================
+        // Filtering
+        // =========================================
+        function filterRecipients() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const school = document.getElementById('filterSchool').value;
+            const role = document.getElementById('filterRole').value;
+            const group = document.getElementById('filterGroup').value;
+
+            filteredRecipients = allRecipients.filter(function (r) {
+                if (school && r.school !== school) return false;
+                if (role && r.role !== role) return false;
+                if (group && r.group !== group) return false;
+                if (search) {
+                    return r.name.toLowerCase().includes(search) ||
+                        r.email.toLowerCase().includes(search);
+                }
+                return true;
+            });
+
+            renderRecipients();
+        }
+
+        // =========================================
+        // Rendering
+        // =========================================
+        function renderRecipients() {
+            const container = document.getElementById('recipientsList');
+
+            if (filteredRecipients.length === 0) {
+                container.innerHTML = '<div class="no-recipients">No recipients found</div>';
+                updateSelectionCount();
+                return;
+            }
+
+            let html = '';
+            filteredRecipients.forEach(function (r) {
+                const checked = selectedEmails.has(r.email) ? 'checked' : '';
+                const selectedClass = selectedEmails.has(r.email) ? ' selected' : '';
+                html += '<div class="recipient-item' + selectedClass + '" onclick="toggleRecipient(\'' + escapeHtml(r.email) + '\')">';
+                html += '  <input type="checkbox" ' + checked + ' onclick="event.stopPropagation(); toggleRecipient(\'' + escapeHtml(r.email) + '\')">';
+                html += '  <div class="recipient-info">';
+                html += '    <div class="recipient-name">' + escapeHtml(r.name) + '</div>';
+                html += '    <div class="recipient-detail">' + escapeHtml(r.email) + ' · ' + escapeHtml(r.school || '') + '</div>';
+                html += '  </div>';
+                html += '</div>';
+            });
+
+            container.innerHTML = html;
+            updateSelectionCount();
+        }
+
+        function toggleRecipient(email) {
+            if (selectedEmails.has(email)) {
+                selectedEmails.delete(email);
+            } else {
+                selectedEmails.add(email);
+            }
+            renderRecipients();
+            updateSendButton();
+        }
+
+        function selectAll() {
+            filteredRecipients.forEach(function (r) {
+                selectedEmails.add(r.email);
+            });
+            renderRecipients();
+            updateSendButton();
+        }
+
+        function deselectAll() {
+            selectedEmails.clear();
+            renderRecipients();
+            updateSendButton();
+        }
+
+        function updateSelectionCount() {
+            const countEl = document.getElementById('selectionCount');
+            const count = selectedEmails.size;
+            countEl.textContent = count + ' selected';
+        }
+
+        // =========================================
+        // Message
+        // =========================================
+        function updateCharCount() {
+            const msg = document.getElementById('messageInput').value;
+            document.getElementById('charCount').textContent = msg.length + ' characters';
+            updateSendButton();
+        }
+
+        function updateSendButton() {
+            const btn = document.getElementById('sendBtn');
+            const msg = document.getElementById('messageInput').value.trim();
+            btn.disabled = selectedEmails.size === 0 || msg.length === 0;
+        }
+
+        // =========================================
+        // Sending
+        // =========================================
+        function sendMessages() {
+            const msg = document.getElementById('messageInput').value.trim();
+            if (!msg || selectedEmails.size === 0) return;
+
+            // Build recipient objects
+            const recipients = allRecipients.filter(function (r) {
+                return selectedEmails.has(r.email);
+            }).map(function (r) {
+                return { email: r.email, name: r.name };
+            });
+
+            // UI: show sending state
+            const btn = document.getElementById('sendBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>Sending…';
+            showStatus('Sending to ' + recipients.length + ' recipient(s)…', 'sending');
+
+            google.script.run
+                .withSuccessHandler(function (result) {
+                    btn.innerHTML = 'Send Message';
+                    updateSendButton();
+
+                    if (result.failed === 0) {
+                        showStatus('✅ Sent successfully to ' + result.sent + ' recipient(s)!', 'success');
+                        // Clear form
+                        document.getElementById('messageInput').value = '';
+                        deselectAll();
+                        updateCharCount();
+                    } else {
+                        let msg = '📨 Sent: ' + result.sent + ' | ❌ Failed: ' + result.failed;
+                        if (result.errors && result.errors.length > 0) {
+                            msg += '\n\nErrors:\n' + result.errors.join('\n');
+                        }
+                        showStatus(msg, 'error');
+                    }
+                })
+                .withFailureHandler(function (err) {
+                    btn.innerHTML = 'Send Message';
+                    updateSendButton();
+                    showStatus('Error: ' + err.message, 'error');
+                })
+                .sendFromSidebar({ recipients: recipients, message: msg });
+        }
+
+        // =========================================
+        // Utilities
+        // =========================================
+        function showStatus(message, type) {
+            const banner = document.getElementById('statusBanner');
+            banner.className = 'status-banner show ' + type;
+            banner.textContent = message;
+
+            if (type === 'success') {
+                setTimeout(function () {
+                    banner.className = 'status-banner';
+                }, 5000);
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+    </script>
+</body>
+
+</html>
