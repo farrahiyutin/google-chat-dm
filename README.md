@@ -1,4 +1,4 @@
-# 💬 Google Chat DM — Apps Script
+   # 💬 Google Chat DM — Apps Script
 
 **Send Google Chat direct messages to individual users from Google Sheets using Google Apps Script.**
 
